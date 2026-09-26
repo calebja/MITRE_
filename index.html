@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cyber Range :: ATT&CK Chain Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0f1a; --panel:#0f1626; --panel2:#121b30; --line:#1e2a45;
+    --text:#dbe4f3; --muted:#7c8aa8; --cyan:#4fd1c5; --cyan-dim:#1f4d49;
+    --green:#3ddc84; --red:#ff6b6b; --amber:#f5c26b;
+    font-family:'Inter',system-ui,sans-serif;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;background:var(--bg);color:var(--text);}
+  body{padding:28px 20px 60px;}
+  .wrap{max-width:1040px;margin:0 auto;}
+  h1{font-size:1.5rem;margin:0 0 4px;font-weight:600;letter-spacing:.2px;}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 6px;max-width:640px;line-height:1.5;}
+  .notice{border:1px solid var(--line);background:var(--panel);color:var(--muted);font-size:.8rem;
+    padding:8px 12px;border-radius:6px;margin:14px 0 26px;line-height:1.5;}
+  .notice b{color:var(--amber);}
+  .grid{display:grid;grid-template-columns:260px 1fr;gap:22px;}
+  @media (max-width:820px){.grid{grid-template-columns:1fr;}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;}
+  .card+.card{margin-top:16px;}
+  .label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:0 0 10px;}
+  .scenario{display:block;width:100%;text-align:left;background:transparent;border:1px solid var(--line);
+    color:var(--text);padding:10px 12px;border-radius:6px;margin-bottom:8px;cursor:pointer;font:inherit;font-size:.85rem;}
+  .scenario b{display:block;font-size:.88rem;}
+  .scenario span{color:var(--muted);font-size:.76rem;}
+  .scenario.active{border-color:var(--cyan);background:var(--cyan-dim);}
+  .ctrl{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);font-size:.85rem;}
+  .ctrl:last-child{border-bottom:none;}
+  .sw{position:relative;width:36px;height:20px;background:#233151;border-radius:20px;cursor:pointer;flex:none;transition:background .15s;}
+  .sw.on{background:var(--cyan-dim);}
+  .sw::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--muted);transition:.15s;}
+  .sw.on::after{left:18px;background:var(--cyan);}
+  .runbtn{width:100%;padding:11px;border:none;border-radius:6px;background:var(--cyan);color:#03211f;
+    font-weight:600;font-size:.88rem;cursor:pointer;margin-top:14px;}
+  .runbtn:disabled{opacity:.5;cursor:default;}
+  .resetbtn{width:100%;padding:9px;border:1px solid var(--line);border-radius:6px;background:transparent;
+    color:var(--muted);font-size:.8rem;cursor:pointer;margin-top:8px;}
+  .chain{display:flex;flex-direction:column;align-items:stretch;}
+  .stage{border:1px solid var(--line);border-radius:6px;padding:10px 14px;display:flex;justify-content:space-between;
+    align-items:center;font-family:'JetBrains Mono',monospace;font-size:.82rem;transition:.2s;background:var(--panel2);}
+  .stage .t{color:var(--muted);font-size:.72rem;}
+  .stage.active{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber) inset;}
+  .stage.hit{border-color:var(--green);}
+  .stage.miss{border-color:var(--red);}
+  .badge{font-weight:700;}
+  .hit .badge{color:var(--green);}
+  .miss .badge{color:var(--red);}
+  .arrow{text-align:center;color:var(--line);font-size:1rem;line-height:1;margin:2px 0;}
+  .console{background:#060a12;border:1px solid var(--line);border-radius:6px;padding:12px 14px;
+    font-family:'JetBrains Mono',monospace;font-size:.76rem;color:#7fe0c9;height:190px;overflow-y:auto;
+    line-height:1.55;white-space:pre-wrap;}
+  .console .warn{color:var(--red);}
+  .console .ok{color:var(--green);}
+  table{width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:.85rem;margin-top:4px;}
+  th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);}
+  th{color:var(--muted);font-weight:500;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;}
+  td.stat{text-align:right;font-weight:700;}
+  .stat.y{color:var(--green);} .stat.n{color:var(--red);}
+  .rate{color:var(--muted);font-size:.8rem;margin-top:10px;}
+  .rate b{color:var(--text);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>MITRE ATT&CK Chain Simulator</h1>
+  <p class="sub">Pick a scenario, configure which controls are live in the lab, then run the chain. Each stage is checked against your control stack to see whether it would have been detected.</p>
+  <div class="notice"><b>Simulated environment.</b> Nothing here touches a real network, host, or account — stage outcomes are computed from a detection-probability model, not from executed attack code.</div>
+
+  <div class="grid">
+    <div>
+      <div class="card">
+        <p class="label">Scenario</p>
+        <div id="scenarios"></div>
+      </div>
+      <div class="card">
+        <p class="label">Security controls online</p>
+        <div id="controls"></div>
+        <button class="runbtn" id="runBtn">Run simulation</button>
+        <button class="resetbtn" id="resetBtn">Reset</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <p class="label">Attack chain</p>
+        <div class="chain" id="chain"></div>
+      </div>
+      <div class="card">
+        <p class="label">Sensor log</p>
+        <div class="console" id="log">Select a scenario and press Run simulation.</div>
+      </div>
+      <div class="card" id="resultsCard" style="display:none;">
+        <p class="label">Results</p>
+        <table>
+          <thead><tr><th>Attack</th><th style="text-align:right;">Detected?</th></tr></thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+        <p class="rate" id="rate"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CONTROLS = [
+  {id:'email', name:'Email security gateway'},
+  {id:'edr',   name:'EDR / endpoint telemetry'},
+  {id:'mfa',   name:'MFA on privileged accounts'},
+  {id:'siem',  name:'SIEM log correlation'},
+  {id:'fw',    name:'Network firewall / IDS'},
+  {id:'dlp',   name:'DLP / egress monitoring'},
+];
+
+const SCENARIOS = [
+ {id:'phish', name:'Phishing-led compromise', desc:'Lure email harvests creds, attacker pivots to the domain.',
+  stages:[
+   {label:'Phishing', tech:'T1566', tactic:'Initial Access', use:{email:.65, edr:.15}},
+   {label:'Credential Theft', tech:'T1056', tactic:'Credential Access', use:{edr:.45, siem:.25}},
+   {label:'Initial Access', tech:'T1078', tactic:'Initial Access', use:{mfa:.7, siem:.3}, fold:'Initial Access'},
+   {label:'Privilege Escalation', tech:'T1068', tactic:'Privilege Escalation', use:{edr:.4, siem:.35}},
+   {label:'Lateral Movement', tech:'T1021', tactic:'Lateral Movement', use:{fw:.45, siem:.4}},
+   {label:'Data Collection', tech:'T1005', tactic:'Data Collection', use:{dlp:.55, siem:.2}},
+  ]},
+ {id:'ransom', name:'Ransomware staging', desc:'Dropper via exploited service, encrypts after harvesting shares.',
+  stages:[
+   {label:'Phishing', tech:'T1190', tactic:'Initial Access', use:{fw:.5, edr:.2}},
+   {label:'Credential Theft', tech:'T1003', tactic:'Credential Access', use:{edr:.6, siem:.2}},
+   {label:'Initial Access', tech:'T1133', tactic:'Initial Access', use:{mfa:.5, fw:.3}, fold:'Initial Access'},
+   {label:'Privilege Escalation', tech:'T1055', tactic:'Privilege Escalation', use:{edr:.3, siem:.25}},
+   {label:'Lateral Movement', tech:'T1570', tactic:'Lateral Movement', use:{fw:.35, siem:.3}},
+   {label:'Data Collection', tech:'T1486', tactic:'Data Collection', use:{dlp:.4, siem:.3}},
+  ]},
+ {id:'insider', name:'Insider misuse', desc:'Valid user account abused for slow, quiet data staging.',
+  stages:[
+   {label:'Phishing', tech:'—', tactic:'Initial Access', use:{email:.1}},
+   {label:'Credential Theft', tech:'T1552', tactic:'Credential Access', use:{siem:.2}},
+   {label:'Initial Access', tech:'T1078.004', tactic:'Initial Access', use:{mfa:.3, siem:.25}, fold:'Initial Access'},
+   {label:'Privilege Escalation', tech:'T1548', tactic:'Privilege Escalation', use:{siem:.3, edr:.2}},
+   {label:'Lateral Movement', tech:'T1021.002', tactic:'Lateral Movement', use:{fw:.25, siem:.35}},
+   {label:'Data Collection', tech:'T1213', tactic:'Data Collection', use:{dlp:.6, siem:.25}},
+  ]},
+];
+
+let active = 0;
+let on = {email:true, edr:true, mfa:true, siem:true, fw:true, dlp:false};
+let running = false;
+
+const $scen = document.getElementById('scenarios');
+const $ctrl = document.getElementById('controls');
+const $chain = document.getElementById('chain');
+const $log = document.getElementById('log');
+const $run = document.getElementById('runBtn');
+const $reset = document.getElementById('resetBtn');
+const $resultsCard = document.getElementById('resultsCard');
+const $resultsBody = document.getElementById('resultsBody');
+const $rate = document.getElementById('rate');
+
+function renderScenarios(){
+  $scen.innerHTML = '';
+  SCENARIOS.forEach((s,i)=>{
+    const b = document.createElement('button');
+    b.className = 'scenario' + (i===active?' active':'');
+    b.innerHTML = `<b>${s.name}</b><span>${s.desc}</span>`;
+    b.onclick = ()=>{ if(running) return; active=i; renderScenarios(); renderChain(); };
+    $scen.appendChild(b);
+  });
+}
+function renderControls(){
+  $ctrl.innerHTML = '';
+  CONTROLS.forEach(c=>{
+    const row = document.createElement('div');
+    row.className = 'ctrl';
+    row.innerHTML = `<span>${c.name}</span>`;
+    const sw = document.createElement('div');
+    sw.className = 'sw' + (on[c.id]?' on':'');
+    sw.onclick = ()=>{ if(running) return; on[c.id]=!on[c.id]; sw.classList.toggle('on'); };
+    row.appendChild(sw);
+    $ctrl.appendChild(row);
+  });
+}
+function renderChain(){
+  $chain.innerHTML = '';
+  const stages = SCENARIOS[active].stages;
+  stages.forEach((s,i)=>{
+    if(i>0){ const a=document.createElement('div'); a.className='arrow'; a.textContent='↓'; $chain.appendChild(a); }
+    const d = document.createElement('div');
+    d.className = 'stage'; d.id = 'stg'+i;
+    d.innerHTML = `<span>${s.label}</span><span class="t">${s.tech}</span>`;
+    $chain.appendChild(d);
+  });
+  $log.textContent = 'Select a scenario and press Run simulation.';
+  $resultsCard.style.display = 'none';
+}
+function logLine(text, cls){
+  const line = document.createElement('div');
+  if(cls) line.className = cls;
+  line.textContent = text;
+  $log.appendChild(line);
+  $log.scrollTop = $log.scrollHeight;
+}
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+async function run(){
+  if(running) return;
+  running = true;
+  $run.disabled = true;
+  $log.textContent = '';
+  $resultsCard.style.display = 'none';
+  const stages = SCENARIOS[active].stages;
+  const outcomes = [];
+
+  for(let i=0;i<stages.length;i++){
+    const s = stages[i];
+    const el = document.getElementById('stg'+i);
+    el.classList.add('active');
+    logLine(`> stage: ${s.label} (${s.tech})`);
+    await sleep(450);
+
+    let detected = false, hitControl = null;
+    for(const [cid, prob] of Object.entries(s.use)){
+      if(!on[cid]) continue;
+      const roll = Math.random();
+      const c = CONTROLS.find(x=>x.id===cid);
+      if(roll < prob){ detected = true; hitControl = c.name; break; }
+    }
+    await sleep(350);
+    el.classList.remove('active');
+    if(detected){
+      el.classList.add('hit');
+      el.querySelector('span').insertAdjacentHTML('afterend','');
+      logLine(`  ${hitControl}: ALERT raised`, 'ok');
+    } else {
+      el.classList.add('miss');
+      logLine(`  no enabled control raised an alert`, 'warn');
+    }
+    outcomes.push({stage:s, detected, tactic: s.fold || s.tactic});
+    await sleep(200);
+  }
+
+  // fold Phishing + "Initial Access" stage into one Initial Access row (any detection counts)
+  const byTactic = {};
+  const order = [];
+  outcomes.forEach(o=>{
+    const key = o.tactic;
+    if(!(key in byTactic)){ byTactic[key]=false; order.push(key); }
+    byTactic[key] = byTactic[key] || o.detected;
+  });
+
+  $resultsBody.innerHTML = '';
+  order.forEach(key=>{
+    const tr = document.createElement('tr');
+    const yes = byTactic[key];
+    tr.innerHTML = `<td>${key}</td><td class="stat ${yes?'y':'n'}" style="text-align:right;">${yes?'✓':'✗'}</td>`;
+    $resultsBody.appendChild(tr);
+  });
+  const det = order.filter(k=>byTactic[k]).length;
+  $rate.innerHTML = `<b>${det}/${order.length}</b> stages detected. Undetected stages are where the current control mix has a coverage gap for this scenario.`;
+  $resultsCard.style.display = 'block';
+
+  running = false;
+  $run.disabled = false;
+}
+
+$run.onclick = run;
+$reset.onclick = ()=>{ if(running) return; renderChain(); };
+
+renderScenarios();
+renderControls();
+renderChain();
+</script>
+</body>
+</html>
