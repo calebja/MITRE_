@@ -1,6 +1,6 @@
 # MITRE ATT&CK Chain Simulator
 
-A small, self-contained web app that models a controlled "cyber range" exercise: pick an attack scenario, choose which security controls are live, run the simulated kill chain, and see which stages would have been detected.
+A small, self-contained web application that models a controlled "cyber range" exercise: pick an attack scenario, choose which security controls are live, run the simulated kill chain, and see which stages would have been detected.
 
 **This is a simulation, not an attack tool.** No real network, host, or account is touched. Every stage outcome is computed from a simple detection-probability model in the browser — there is no attack code, exploit code, or external calls of any kind.
 
