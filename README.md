@@ -1,5 +1,14 @@
 # MITRE ATT&CK Chain Simulator
 
+![MITRE ATT&CK](https://img.shields.io/badge/MITRE_ATT%26CK-technique_mapping-B91C1C)
+![Type](https://img.shields.io/badge/type-cyber_range_simulation-183A61)
+![Stack](https://img.shields.io/badge/stack-HTML%20%2B%20JavaScript-F7DF1E?logo=javascript&logoColor=black)
+![Dependencies](https://img.shields.io/badge/dependencies-none-2EA44F)
+![Build](https://img.shields.io/badge/build-no_build_step-557C94)
+![Hosting](https://img.shields.io/badge/deploy-GitHub%20Pages-222222?logo=githubpages&logoColor=white)
+![Safety](https://img.shields.io/badge/no_real_attack_code-simulation_only-orange)
+![License](https://img.shields.io/github/license/calebja/MITRE_ATT-CK_Simulator?color=green)
+
 A small, self-contained web application that models a controlled "cyber range" exercise: pick an attack scenario, choose which security controls are live, run the simulated kill chain, and see which stages would have been detected.
 
 **This is a simulation, not an attack tool.** No real network, host, or account is touched. Every stage outcome is computed from a simple detection-probability model in the browser. There is no attack code, exploit code, or external calls of any kind.
