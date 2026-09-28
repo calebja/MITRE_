@@ -2,15 +2,15 @@
 
 A small, self-contained web application that models a controlled "cyber range" exercise: pick an attack scenario, choose which security controls are live, run the simulated kill chain, and see which stages would have been detected.
 
-**This is a simulation, not an attack tool.** No real network, host, or account is touched. Every stage outcome is computed from a simple detection-probability model in the browser — there is no attack code, exploit code, or external calls of any kind.
+**This is a simulation, not an attack tool.** No real network, host, or account is touched. Every stage outcome is computed from a simple detection-probability model in the browser. There is no attack code, exploit code, or external calls of any kind.
 
 ## What it does
 
-- **Scenario picker** — three example kill chains (phishing-led compromise, ransomware staging, insider misuse), each mapped loosely to MITRE ATT&CK tactics and technique IDs.
-- **Control toggles** — turn simulated security controls on/off: email security gateway, EDR, MFA, SIEM correlation, network firewall/IDS, DLP.
-- **Attack chain view** — the six-stage flow (Phishing → Credential Theft → Initial Access → Privilege Escalation → Lateral Movement → Data Collection) lights up stage by stage as the simulation runs.
-- **Sensor log** — a running console of which control (if any) "caught" each stage.
-- **Results table** — final detected/undetected summary per MITRE tactic, e.g.:
+- **Scenario Picker** - Three example kill chains (phishing-led compromise, ransomware staging, insider misuse), each mapped loosely to MITRE ATT&CK tactics and technique IDs.
+- **Control Toggles** - Turn simulated security controls on/off: email security gateway, EDR, MFA, SIEM correlation, network firewall/IDS, DLP.
+- **Attack Chain View** - The six-stage flow (Phishing → Credential Theft → Initial Access → Privilege Escalation → Lateral Movement → Data Collection) lights up stage by stage as the simulation runs.
+- **Sensor Log** - Running console of which control (if any) "caught" each stage.
+- **Results Table** - Final detected/undetected summary per MITRE tactic, e.g.:
 
   ```
   ATTACK                 DETECTED?
