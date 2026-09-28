@@ -13,7 +13,7 @@ A small, self-contained web application that models a controlled "cyber range" e
 
 **This is a simulation, not an attack tool.** No real network, host, or account is touched. Every stage outcome is computed from a simple detection-probability model in the browser. There is no attack code, exploit code, or external calls of any kind.
 
-## What it does
+## Functions
 
 - **Scenario Picker** - Three example kill chains (phishing-led compromise, ransomware staging, insider misuse), each mapped loosely to MITRE ATT&CK tactics and technique IDs.
 - **Control Toggles** - Turn simulated security controls on/off: email security gateway, EDR, MFA, SIEM correlation, network firewall/IDS, DLP.
@@ -31,14 +31,14 @@ A small, self-contained web application that models a controlled "cyber range" e
   Data Collection            ✗
   ```
 
-## Running it
+## Running the Simulation
 
 It's a single static HTML file with no build step and no dependencies.
 
 - **Locally:** open `index.html` in any browser.
 - **GitHub Pages:** enable Pages on this repo (Settings → Pages → Deploy from branch → `main` / root) and it will be served directly, since the app is named `index.html`.
 
-## Project structure
+## Repo Structure
 
 ```
 .
