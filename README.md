@@ -49,10 +49,10 @@ It's a single static HTML file with no build step and no dependencies.
 
 ## Customizing
 
-Everything lives in `index.html`:
+Important project materials live in `index.html`:
 
-- `SCENARIOS` — add or edit kill chains, stage labels, ATT&CK technique IDs, and per-control detection probabilities per stage.
-- `CONTROLS` — add or rename simulated security controls.
+- `SCENARIOS` — Add or edit kill chains, stage labels, ATT&CK technique IDs, and per-control detection probabilities per stage.
+- `CONTROLS` — Add or rename simulated security controls.
 - The results table folds any stage with a `fold` property into the tactic it names, so you can add sub-steps without changing the final report format.
 
 ## License
